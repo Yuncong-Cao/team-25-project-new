@@ -12,4 +12,13 @@ class User {
     required this.name,
     required this.rating,
   });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      email: json['email'],
+      name: json['name'],
+      rating: json['rating'].toDouble(),
+    );
+  }
 }
