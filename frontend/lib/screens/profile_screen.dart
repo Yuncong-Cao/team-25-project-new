@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../widgets/rating_bar.dart';
 
+
 class ProfileScreen extends StatelessWidget {
   final User user;
 

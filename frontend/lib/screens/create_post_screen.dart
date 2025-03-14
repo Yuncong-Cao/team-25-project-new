@@ -1,10 +1,13 @@
-// 创建新帖子页面，用户可输入标题和描述并提交
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/swap_post_provider.dart';
 
-class CreatePostScreen extends StatelessWidget {
+class CreatePostScreen extends StatefulWidget {
+  @override
+  _CreatePostScreenState createState() => _CreatePostScreenState();
+}
+
+class _CreatePostScreenState extends State<CreatePostScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -29,22 +32,15 @@ class CreatePostScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 final title = _titleController.text;
                 final description = _descriptionController.text;
+                final userId = "123"; // 这里可以改成实际的用户 ID
 
-                if (title.isEmpty || description.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Please fill all fields')),
-                  );
-                  return;
-                }
-
-                // Create new post
-                swapPostProvider.createPost(title, description);
+                await swapPostProvider.createPost(title, description, userId);
                 Navigator.pop(context);
               },
-              child: Text('Create Post'),
+              child: Text('Submit'),
             ),
           ],
         ),

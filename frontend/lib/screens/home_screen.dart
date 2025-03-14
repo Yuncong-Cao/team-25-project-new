@@ -1,13 +1,10 @@
-// 首页，展示 AI 推荐的课程交换帖子列表
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/swap_post_provider.dart';
 import '../widgets/swap_post_card.dart';
+import '../models/swap_post.dart';
 
 class HomeScreen extends StatelessWidget {
-  final _searchController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     final swapPostProvider = Provider.of<SwapPostProvider>(context);
@@ -27,15 +24,21 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: swapPostProvider.posts.isEmpty
-          ? Center(child: Text('No posts available'))
-          : ListView.builder(
-              itemCount: swapPostProvider.posts.length,
+      body: Consumer<SwapPostProvider>(
+        builder: (context, provider, child) {
+          if (provider.posts.isEmpty) {
+            return Center(child: Text('No posts available'));
+          } else {
+            return ListView.builder(
+              itemCount: provider.posts.length,
               itemBuilder: (context, index) {
-                final post = swapPostProvider.posts[index];
+                final post = provider.posts[index];
                 return SwapPostCard(post: post);
               },
-            ),
+            );
+          }
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/create-post');
@@ -46,8 +49,8 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// 实现搜索委托
-class PostSearchDelegate extends SearchDelegate<String> {
+// 搜索委托类
+class PostSearchDelegate extends SearchDelegate<SwapPost?> {
   final SwapPostProvider swapPostProvider;
 
   PostSearchDelegate(this.swapPostProvider);
@@ -59,6 +62,7 @@ class PostSearchDelegate extends SearchDelegate<String> {
         icon: Icon(Icons.clear),
         onPressed: () {
           query = '';
+          showSuggestions(context);
         },
       ),
     ];
@@ -76,21 +80,29 @@ class PostSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    swapPostProvider.searchPosts(query);
-    return _buildSearchResults();
+    final results = swapPostProvider.posts
+        .where((post) => post.title.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+    return _buildSearchResults(results);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    swapPostProvider.searchPosts(query);
-    return _buildSearchResults();
+    final results = swapPostProvider.posts
+        .where((post) => post.title.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+    return _buildSearchResults(results);
   }
 
-  Widget _buildSearchResults() {
+  Widget _buildSearchResults(List<SwapPost> results) {
+    if (results.isEmpty) {
+      return Center(child: Text('No matching posts found'));
+    }
+
     return ListView.builder(
-      itemCount: swapPostProvider.posts.length,
+      itemCount: results.length,
       itemBuilder: (context, index) {
-        final post = swapPostProvider.posts[index];
+        final post = results[index];
         return SwapPostCard(post: post);
       },
     );

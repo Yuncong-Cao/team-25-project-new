@@ -13,10 +13,15 @@ dependencies:
     sdk: flutter
   provider: ^6.0.0
   dio: ^5.0.0
+  async: ^2.12.0  # 降级 async 以匹配 flutter_test 依赖
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  mockito: ^5.4.0
+  build_runner: ^2.4.0
+  flutter_lints: ^2.0.0  # 添加 Flutter Lints，确保代码质量
 
 flutter:
   uses-material-design: true
+

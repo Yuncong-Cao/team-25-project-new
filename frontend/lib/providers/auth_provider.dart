@@ -1,5 +1,3 @@
-// 管理用户认证状态（如登录、注册、Token 存储等）
-
 import 'package:flutter/foundation.dart';
 import '../services/api_service.dart';
 import '../models/user.dart';
@@ -8,47 +6,62 @@ class AuthProvider with ChangeNotifier {
   bool _isAuthenticated = false;
   String? _token;
   User? _currentUser;
-  List<User> _users = [];
 
   bool get isAuthenticated => _isAuthenticated;
   String? get token => _token;
   User? get currentUser => _currentUser;
 
-  User? getUserById(String userId) {
-    return _users.firstWhere((user) => user.id == userId, orElse: () => null);
-  }
-
+  /// 用户登录
   Future<void> login(String email, String password) async {
     try {
       final response = await ApiService.post('/login', data: {
         'email': email,
         'password': password,
       });
-      _token = response.data['token'];
-      _isAuthenticated = true;
-      _currentUser = User.fromJson(response.data['user']);
-      _users.add(_currentUser!);
-      notifyListeners();
+
+      if (response != null && response.statusCode == 200) {
+        _token = response.data['token'];
+        _isAuthenticated = true;
+        _currentUser = User.fromJson(response.data['user']);
+        notifyListeners();
+      } else {
+        throw Exception('登录失败: ${response?.statusMessage}');
+      }
     } catch (error) {
       _isAuthenticated = false;
-      throw Exception('Login failed');
+      notifyListeners();
+      throw Exception('发生错误: $error');
     }
   }
 
+  /// 用户注册
   Future<void> register(String email, String password) async {
     try {
       final response = await ApiService.post('/register', data: {
         'email': email,
         'password': password,
       });
-      _token = response.data['token'];
-      _isAuthenticated = true;
-      _currentUser = User.fromJson(response.data['user']);
-      _users.add(_currentUser!);
-      notifyListeners();
+
+      if (response != null && response.statusCode == 200) {
+        _token = response.data['token'];
+        _isAuthenticated = true;
+        _currentUser = User.fromJson(response.data['user']);
+        notifyListeners();
+      } else {
+        throw Exception('注册失败: ${response?.statusMessage}');
+      }
     } catch (error) {
       _isAuthenticated = false;
-      throw Exception('Registration failed');
+      notifyListeners();
+      throw Exception('发生错误: $error');
     }
+  }
+
+  /// 用户登出
+  void logout() {
+    _token = null;
+    _isAuthenticated = false;
+    _currentUser = null;
+    notifyListeners();
   }
 }

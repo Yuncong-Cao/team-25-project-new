@@ -1,17 +1,21 @@
-# 使用 Flutter 3.7.0 作为基础镜像
-FROM cirrusci/flutter:3.7.0
+FROM cirrusci/flutter:latest AS build
 
-# 设置工作目录
 WORKDIR /app
 
-# 复制项目文件
+# 允许 root 权限运行（如果需要）
+ENV FLUTTER_ALLOW_ROOT=1
+
+# 复制整个 Flutter 项目
 COPY . .
 
 # 安装依赖
 RUN flutter pub get
 
-# 暴露端口
-EXPOSE 8080
+# 构建 Web
+RUN flutter build web
 
-# 启动 Flutter 应用
-CMD ["flutter", "run", "--web-port", "8080", "--web-hostname", "0.0.0.0"]
+# 使用 Nginx
+FROM nginx:alpine
+COPY --from=build /app/build/web /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

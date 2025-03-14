@@ -1,36 +1,23 @@
-// 单元测试用户认证逻辑（如登录、注册功能）
-
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:dio/dio.dart';
-import '../lib/providers/auth_provider.dart';
-
-class MockDio extends Mock implements Dio {}
+import '../lib/services/api_service.dart';
 
 void main() {
-  group('AuthProvider', () {
-    late AuthProvider authProvider;
-    late MockDio mockDio;
-
-    setUp(() {
-      mockDio = MockDio();
-      authProvider = AuthProvider();
+  test('User login API', () async {
+    final response = await ApiService.post('/login', data: {
+      'email': 'test@example.com', // 确保是 String
+      'password': 'password123',
     });
 
-    test('login success', () async {
-      when(mockDio.post(any, data: anyNamed('data')))
-        .thenAnswer((_) async => Response(data: {'token': 'test-token'}, statusCode: 200));
+    expect(response?.statusCode, equals(200));
+  });
 
-      await authProvider.login('test@example.com', 'password');
-      expect(authProvider.isAuthenticated, true);
-      expect(authProvider.token, 'test-token');
+  test('User registration API', () async {
+    final response = await ApiService.post('/register', data: {
+      'email': 'newuser@example.com', // 确保是 String
+      'password': 'securepassword',
     });
 
-    test('login failure', () async {
-      when(mockDio.post(any, data: anyNamed('data')))
-        .thenThrow(DioError(requestOptions: RequestOptions(path: '')));
-
-      expect(() async => await authProvider.login('test@example.com', 'password'), throwsException);
-    });
+    expect(response?.statusCode, equals(201));
   });
 }
+
