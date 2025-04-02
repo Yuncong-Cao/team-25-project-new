@@ -15,7 +15,11 @@ class AuthProvider with ChangeNotifier {
   User? get currentUser => _currentUser;
 
   User? getUserById(String userId) {
-    return _users.firstWhere((user) => user.id == userId, orElse: () => null);
+    try {
+      return _users.firstWhere((user) => user.id == userId);
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<void> login(String email, String password) async {

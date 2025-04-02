@@ -3,6 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/create_post_screen.dart';
+import 'screens/post_detail_screen.dart';
+import 'screens/profile_screen.dart';
+import 'models/swap_post.dart';
+import 'models/user.dart';
 import 'providers/auth_provider.dart';
 import 'providers/swap_post_provider.dart';
 
@@ -32,8 +39,12 @@ class MyApp extends StatelessWidget {
         '/register': (context) => RegisterScreen(),
         '/home': (context) => HomeScreen(),
         '/create-post': (context) => CreatePostScreen(),
-        '/post-detail': (context) => PostDetailScreen(post: ModalRoute.of(context)!.settings.arguments as SwapPost),
-        '/profile': (context) => ProfileScreen(user: ModalRoute.of(context)!.settings.arguments as User),
+        '/post-detail': (context) => PostDetailScreen(
+              post: ModalRoute.of(context)!.settings.arguments as SwapPost,
+            ),
+        '/profile': (context) => ProfileScreen(
+              user: ModalRoute.of(context)!.settings.arguments as User,
+            ),
       },
     );
   }

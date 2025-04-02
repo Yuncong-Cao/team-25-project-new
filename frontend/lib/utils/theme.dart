@@ -14,8 +14,8 @@ final appTheme = ThemeData(
     ),
   ),
   textTheme: TextTheme(
-    bodyText1: TextStyle(fontSize: 16),
-    bodyText2: TextStyle(fontSize: 14),
-    button: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    bodyLarge: TextStyle(fontSize: 16),
+    bodyMedium: TextStyle(fontSize: 14),
+    labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
   ),
 );

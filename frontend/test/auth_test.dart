@@ -18,8 +18,11 @@ void main() {
     });
 
     test('login success', () async {
-      when(mockDio.post(any, data: anyNamed('data')))
-        .thenAnswer((_) async => Response(data: {'token': 'test-token'}, statusCode: 200));
+      when(mockDio.post('/login', data: anyNamed('data'))).thenAnswer(
+          (_) async => Response(
+              data: {'token': 'test-token'},
+              statusCode: 200,
+              requestOptions: RequestOptions(path: '/login')));
 
       await authProvider.login('test@example.com', 'password');
       expect(authProvider.isAuthenticated, true);
@@ -27,10 +30,12 @@ void main() {
     });
 
     test('login failure', () async {
-      when(mockDio.post(any, data: anyNamed('data')))
-        .thenThrow(DioError(requestOptions: RequestOptions(path: '')));
+      when(mockDio.post('/login', data: anyNamed('data'))).thenThrow(
+          DioException(requestOptions: RequestOptions(path: '/posts')));
 
-      expect(() async => await authProvider.login('test@example.com', 'password'), throwsException);
+      expect(
+          () async => await authProvider.login('test@example.com', 'password'),
+          throwsException);
     });
   });
 }

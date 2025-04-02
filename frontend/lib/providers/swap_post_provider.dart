@@ -13,7 +13,9 @@ class SwapPostProvider with ChangeNotifier {
   Future<void> fetchPosts() async {
     try {
       final response = await ApiService.get('/posts');
-      _posts = (response.data as List).map((post) => SwapPost.fromJson(post)).toList();
+      _posts = (response.data as List)
+          .map((post) => SwapPost.fromJson(post))
+          .toList();
       _filteredPosts = []; // 初始化筛选列表
       notifyListeners();
     } catch (error) {
@@ -34,14 +36,14 @@ class SwapPostProvider with ChangeNotifier {
       throw Exception('Failed to create post');
     }
   }
-  
+
   void searchPosts(String query) {
     if (query.isEmpty) {
       _filteredPosts = []; // 如果查询为空，显示所有帖子
     } else {
       _filteredPosts = _posts.where((post) {
         return post.title.toLowerCase().contains(query.toLowerCase()) ||
-               post.description.toLowerCase().contains(query.toLowerCase());
+            post.description.toLowerCase().contains(query.toLowerCase());
       }).toList();
     }
     notifyListeners();

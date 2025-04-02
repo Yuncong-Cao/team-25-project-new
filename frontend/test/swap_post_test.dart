@@ -19,10 +19,16 @@ void main() {
     });
 
     test('fetchPosts success', () async {
-      when(mockDio.get(any))
-        .thenAnswer((_) async => Response(data: [
-          {'id': '1', 'title': 'Test Post', 'description': 'This is a test post.', 'authorId': '1', 'createdAt': '2023-10-01T00:00:00Z', 'rating': 4.0}
-        ], statusCode: 200));
+      when(mockDio.get('/posts')).thenAnswer((_) async => Response(data: [
+            {
+              'id': '1',
+              'title': 'Test Post',
+              'description': 'This is a test post.',
+              'authorId': '1',
+              'createdAt': '2023-10-01T00:00:00Z',
+              'rating': 4.0
+            }
+          ], statusCode: 200, requestOptions: RequestOptions(path: '/posts')));
 
       await swapPostProvider.fetchPosts();
       expect(swapPostProvider.posts.length, 1);
@@ -30,8 +36,8 @@ void main() {
     });
 
     test('fetchPosts failure', () async {
-      when(mockDio.get(any))
-        .thenThrow(DioError(requestOptions: RequestOptions(path: '')));
+      when(mockDio.get('/posts')).thenThrow(
+          DioException(requestOptions: RequestOptions(path: '/posts')));
 
       expect(() async => await swapPostProvider.fetchPosts(), throwsException);
     });
