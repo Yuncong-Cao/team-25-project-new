@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:dio/dio.dart';
 import '../lib/providers/swap_post_provider.dart';
-import '../lib/models/swap_post.dart';
 
 class MockDio extends Mock implements Dio {}
 
