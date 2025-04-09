@@ -5,7 +5,11 @@ from typing import List
 
 # User operations
 def create_user(db: Session, user: schemas.UserCreate, hashed_password: str):
-    db_user = models.User(username=user.username, email=user.email, hashed_password=hashed_password)
+    db_user = models.User(
+        username=user.username,
+        email=user.email,
+        hashed_password=hashed_password
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -16,6 +20,16 @@ def get_user_by_email(db: Session, email: str):
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
+
+# 新增：更新用户评分的方法
+def update_user_rating(db: Session, user_id: int, new_rating: float):
+    db_user = get_user(db, user_id=user_id)
+    if not db_user:
+        return None
+    db_user.rating = new_rating
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 # Swap post operations
 def create_swap_post(db: Session, post: schemas.SwapPostCreate, owner_id: int):
@@ -72,5 +86,6 @@ def confirm_transaction_by_counter(db: Session, transaction_id: int):
 
 def get_user_transactions(db: Session, user_id: int) -> List[models.SwapTransaction]:
     # Retrieve transactions for swap posts owned by the user
-    return db.query(models.SwapTransaction).join(models.SwapPost, models.SwapTransaction.post_id == models.SwapPost.id)\
-           .filter(models.SwapPost.owner_id == user_id).all()
+    return db.query(models.SwapTransaction) \
+             .join(models.SwapPost, models.SwapTransaction.post_id == models.SwapPost.id) \
+             .filter(models.SwapPost.owner_id == user_id).all()

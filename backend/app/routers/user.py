@@ -29,3 +29,11 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
+
+# 新增：更新用户评分接口
+@router.put("/{user_id}/rating", response_model=schemas.User)
+def update_rating(user_id: int, rating_update: schemas.UserRatingUpdate, db: Session = Depends(get_db)):
+    db_user = crud.update_user_rating(db, user_id, rating_update.rating)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user

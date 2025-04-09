@@ -18,6 +18,13 @@ class User(UserBase):
     class Config:
         orm_mode = True
 
+# 新增：用于更新用户评分的 schema
+class UserRatingUpdate(BaseModel):
+    rating: float   # 你可以根据需要增加范围约束，比如0 <= rating <= 5
+
+    class Config:
+        orm_mode = True
+
 # Swap post-related schemas
 class SwapPostBase(BaseModel):
     course_name: str
