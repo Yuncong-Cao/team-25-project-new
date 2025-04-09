@@ -10,7 +10,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final swapPostProvider = Provider.of<SwapPostProvider>(context);
+    final swapPostProvider = Provider.of<SwapPostProvider>(context, listen: false);
+    Future.microtask(() => swapPostProvider.fetchPosts());
 
     return Scaffold(
       appBar: AppBar(
