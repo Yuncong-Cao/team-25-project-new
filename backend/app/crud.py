@@ -1,5 +1,4 @@
-# backend/app/crud.py
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app import models, schemas
 from typing import List
 
@@ -43,7 +42,11 @@ def get_swap_post(db: Session, post_id: int):
     return db.query(models.SwapPost).filter(models.SwapPost.id == post_id).first()
 
 def get_swap_posts(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.SwapPost).offset(skip).limit(limit).all()
+    return db.query(models.SwapPost) \
+             .options(joinedload(models.SwapPost.owner)) \
+             .offset(skip) \
+             .limit(limit) \
+             .all()
 
 def update_swap_post_status(db: Session, post_id: int, status: str):
     db_post = get_swap_post(db, post_id)

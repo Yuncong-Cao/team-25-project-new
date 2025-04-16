@@ -5,12 +5,22 @@ import random
 
 def compute_recommendations(user_id: int, posts: list) -> List[int]:
     """
-    Compute recommendation results based on the current user and all swap posts.
-    In this placeholder, simply return a random list of swap post IDs that are not owned by the user.
+    Recommend swap posts not created by the current user.
+    Sort posts based on the rating of the post owner (descending),
+    and return up to 5 recommended post IDs.
     """
     if not posts:
         return []
-    post_ids = [post.id for post in posts if post.owner_id != user_id]
-    # Return up to 5 recommended results
-    recommendations = random.sample(post_ids, min(len(post_ids), 5))
-    return recommendations
+
+    # 过滤掉自己发的帖子
+    filtered_posts = [post for post in posts if post.owner_id != user_id]
+
+    # 根据 owner.rating 降序排列，rating 越高越靠前
+    sorted_posts = sorted(
+        filtered_posts,
+        key=lambda post: getattr(post.owner, 'rating', 0),
+        reverse=True
+    )
+
+    # 返回最多 5 个帖子 ID
+    return [post.id for post in sorted_posts[:5]]
