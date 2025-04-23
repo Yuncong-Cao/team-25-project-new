@@ -6,34 +6,52 @@ import '../models/swap_post.dart';
 
 class SwapPostProvider with ChangeNotifier {
   List<SwapPost> _posts = [];
-  List<SwapPost> _filteredPosts = []; // 用于存储筛选后的帖子
+  List<SwapPost> _filteredPosts = [];
+  bool _isLoading = false;
 
   List<SwapPost> get posts => _filteredPosts.isEmpty ? _posts : _filteredPosts;
+  bool get isLoading => _isLoading;
 
-  Future<void> fetchPosts() async {
+  Future<void> fetchPosts(String token) async {
+    if (_isLoading) return;
+
+    _isLoading = true;
+    notifyListeners();
+
     try {
-      final response = await ApiService.get('/posts');
+      final response = await ApiService.get('/posts', token: token);
       _posts = (response.data as List)
           .map((post) => SwapPost.fromJson(post))
           .toList();
-      _filteredPosts = []; // 初始化筛选列表
-      notifyListeners();
+      _filteredPosts = [];
     } catch (error) {
-      throw Exception('Failed to load posts');
+      _posts = [];
+      _filteredPosts = [];
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
-  Future<void> createPost(String title, String description) async {
+  Future<void> createPost(
+    String title,
+    String description,
+    String token,
+  ) async {
     try {
-      final response = await ApiService.post('/posts', data: {
-        'title': title,
-        'description': description,
-      });
-      final newPost = SwapPost.fromJson(response.data);
-      _posts.add(newPost);
+      final response = await ApiService.post(
+        '/posts',
+        data: {
+          'title': title,
+          'description': description,
+        },
+        token: token,
+      );
+      _posts.add(SwapPost.fromJson(response.data));
       notifyListeners();
     } catch (error) {
-      throw Exception('Failed to create post');
+      throw Exception('Failed to create posts');
     }
   }
 

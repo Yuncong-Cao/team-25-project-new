@@ -1,9 +1,10 @@
 // 创建新帖子页面，用户可输入标题和描述并提交
 
+import 'package:courseswap/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart'; // 加点高级字体
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // 加 icon
+import 'package:google_fonts/google_fonts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../providers/swap_post_provider.dart';
 
@@ -26,9 +27,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     super.dispose();
   }
 
-  void _handleSubmit(SwapPostProvider provider) {
+  Future<void> _handleSubmit(SwapPostProvider provider) async {
     final title = _titleController.text.trim();
     final description = _descriptionController.text.trim();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     if (title.isEmpty || description.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -39,25 +41,29 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     setState(() => _isSubmitting = true);
 
-    Future.delayed(const Duration(seconds: 1), () {
-      provider.createPost(title, description);
+    try {
+      await provider.createPost(title, description, authProvider.token!);
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(' Post created!'),
-          backgroundColor: Colors.green,
-        ),
+        const SnackBar(content: Text('🎉 Post created!')),
       );
-
-      setState(() => _isSubmitting = false);
       _titleController.clear();
       _descriptionController.clear();
-    });
+      Navigator.pop(context); // 成功后返回上一页
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final swapPostProvider = Provider.of<SwapPostProvider>(context);
+    final swapPostProvider = context.read<SwapPostProvider>();
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -80,10 +86,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             children: [
               Text(
                 'Share your thoughts 💬',
-                style: GoogleFonts.lobster(
-                  fontSize: 32,
-                  color: Colors.white,
-                ),
+                style: GoogleFonts.lobster(fontSize: 32, color: Colors.white),
               ),
               const SizedBox(height: 32),
               _buildTextField(
@@ -104,9 +107,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 child: ElevatedButton.icon(
                   icon: const Icon(FontAwesomeIcons.paperPlane),
                   label: _isSubmitting
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : const Text('Publish'),
                   style: ElevatedButton.styleFrom(
@@ -117,8 +124,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  onPressed:
-                      _isSubmitting ? null : () => _handleSubmit(swapPostProvider),
+                  onPressed: _isSubmitting
+                      ? null
+                      : () => _handleSubmit(swapPostProvider),
                 ),
               ),
             ],
@@ -144,9 +152,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         prefixIcon: Icon(icon, color: Colors.white),
         filled: true,
         fillColor: Colors.white.withOpacity(0.1),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
         focusedBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.white),
           borderRadius: BorderRadius.circular(15),

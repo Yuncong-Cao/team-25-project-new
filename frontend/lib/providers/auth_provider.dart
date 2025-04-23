@@ -29,6 +29,7 @@ class AuthProvider with ChangeNotifier {
         'password': password,
       });
       _token = response.data['token'];
+      print('Login success, _token value: $_token');
       _isAuthenticated = true;
       _currentUser = User.fromJson(response.data['user']);
       _users.add(_currentUser!);
@@ -41,16 +42,20 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> register(String email, String password) async {
     try {
+      print('Sending registration request with email: $email and password: $password');
       final response = await ApiService.post('/register', data: {
         'email': email,
         'password': password,
       });
+      print('Registration response: ${response.data}');
       _token = response.data['token'];
+      print('Register success, _token value: $_token');
       _isAuthenticated = true;
       _currentUser = User.fromJson(response.data['user']);
       _users.add(_currentUser!);
       notifyListeners();
     } catch (error) {
+      print('Registration error: $error');
       _isAuthenticated = false;
       throw Exception('Registration failed');
     }

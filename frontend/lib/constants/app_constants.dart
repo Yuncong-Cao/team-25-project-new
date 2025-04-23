@@ -3,5 +3,5 @@
 class AppConstants {
   static const String appName = "CourseSwap";
   static const String apiBaseUrl =
-      "http://localhost:8000/api"; // TODO: change the url
+      "http://localhost:8000/"; // TODO: change the url
 }

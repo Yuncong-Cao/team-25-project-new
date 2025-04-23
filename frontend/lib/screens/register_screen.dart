@@ -34,25 +34,28 @@ class RegisterScreen extends StatelessWidget {
                 final email = _emailController.text;
                 final password = _passwordController.text;
 
-                // Validate input
                 final emailError = Validators.validateEmail(email);
                 final passwordError = Validators.validatePassword(password);
 
                 if (emailError != null || passwordError != null) {
+                  print('Email validation error: $emailError, Password validation error: $passwordError');
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(emailError ?? passwordError!)),
                   );
                   return;
                 }
 
-                // Perform registration
-                await authProvider.register(email, password);
-                if (authProvider.isAuthenticated) {
-                  Navigator.pushReplacementNamed(context, '/home');
+                try {
+                  await authProvider.register(email, password);
+                  Navigator.pushReplacementNamed(context, '/login');
+                } catch (error) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Registration failed: $error')),
+                  );
                 }
               },
               child: Text('Register'),
-            ),
+            )
           ],
         ),
       ),

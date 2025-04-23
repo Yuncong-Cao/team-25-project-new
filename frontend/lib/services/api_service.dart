@@ -9,9 +9,32 @@ class ApiService {
     headers: {'Content-Type': 'application/json'},
   ));
 
-  static Future<Response> get(String path) => _dio.get(path);
-  static Future<Response> post(String path, {dynamic data}) =>
-      _dio.post(path, data: data);
+  static Future<Response> get(String path, {String? token}) async {
+    return _dio.get(
+      path,
+      options: _buildOptions(token),
+    );
+  }
+
+  static Future<Response> post(
+    String path, {
+    dynamic data,
+    String? token,
+  }) async {
+    return _dio.post(
+      path,
+      data: data,
+      options: _buildOptions(token),
+    );
+  }
+
+  // 私有方法：构建请求配置
+  static Options _buildOptions(String? token) {
+    return Options(headers: {
+      if (token != null) 'Authorization': 'Bearer $token',
+    });
+  }
+
   static Future<Response> put(String path, {dynamic data}) =>
       _dio.put(path, data: data);
   static Future<Response> delete(String path) => _dio.delete(path);
