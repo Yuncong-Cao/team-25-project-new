@@ -1,4 +1,4 @@
-// 应用入口文件，初始化 Flutter 应用并配置路由和全局状态管理
+// Application entry file, initializes the Flutter app and configures routing and global state management
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

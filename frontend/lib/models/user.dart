@@ -1,4 +1,4 @@
-// 定义用户数据模型（如用户 ID、邮箱、评分等）
+// Defines the user data model (such as user ID, email, rating, etc.)
 
 class User {
   final String id;
@@ -20,5 +20,13 @@ class User {
       name: json['name'],
       rating: json['rating'].toDouble(),
     );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'name': name,
+      'rating': rating,
+    };
   }
 }

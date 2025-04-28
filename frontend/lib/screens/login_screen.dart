@@ -1,4 +1,4 @@
-// 用户登录页面，处理邮箱和密码输入
+// User login page, handles email and password input
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

@@ -1,9 +1,11 @@
-// 帖子详情页，显示单个帖子的详细信息和操作按钮
+// Post detail page, displays detailed information and action buttons for a single post
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/swap_post.dart';
+import '../models/user.dart';
 import '../providers/auth_provider.dart';
+import '../services/api_service.dart';
 import '../widgets/rating_bar.dart';
 
 class PostDetailScreen extends StatelessWidget {
@@ -24,7 +26,26 @@ class PostDetailScreen extends StatelessWidget {
           children: [
             Text(post.description, style: TextStyle(fontSize: 16)),
             SizedBox(height: 20),
-            RatingBar(rating: post.rating),
+            RatingBar(
+              initialRating: post.rating,
+              isReadOnly: false,
+              onRatingSelected: (rating) async {
+                final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                final token = authProvider.token;
+                if (token != null) {
+                  try {
+                    await ApiService.postRating(post.id, rating, token);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Rating submitted!')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to submit rating')),
+                    );
+                  }
+                }
+              },
+            ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
@@ -33,24 +54,33 @@ class PostDetailScreen extends StatelessWidget {
               child: Text('Confirm Swap'),
             ),
             SizedBox(height: 20),
-            // 添加查看作者个人资料的按钮
-            ElevatedButton(
-              onPressed: () {
-                // 从 AuthProvider 中获取作者的用户信息
-                final author = authProvider.getUserById(post.authorId);
-                if (author != null) {
-                  Navigator.pushNamed(
-                    context,
-                    '/profile',
-                    arguments: author,
+            // 所有人都可以查看帖主的个人资料
+            Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () async {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (_) => const Center(child: CircularProgressIndicator()),
                   );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Author not found')),
-                  );
-                }
-              },
-              child: Text('View Author Profile'),
+                  try {
+                    final response = await ApiService.getUserById(post.authorId);
+                    final user = User.fromJson(response.data);
+                    Navigator.of(context).pop(); // close loader
+                    Navigator.pushNamed(
+                      context,
+                      '/profile',
+                      arguments: user,
+                    );
+                  } catch (error) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to load author profile: $error')),
+                    );
+                  }
+                },
+                child: const Text('View Author Profile'),
+              ),
             ),
           ],
         ),

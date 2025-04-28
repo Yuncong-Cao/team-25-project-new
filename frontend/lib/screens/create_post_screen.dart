@@ -1,4 +1,4 @@
-// 创建新帖子页面，用户可输入标题和描述并提交
+// Create new post page, users can enter title and description and submit
 
 import 'package:courseswap/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +50,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       );
       _titleController.clear();
       _descriptionController.clear();
-      Navigator.pop(context); // 成功后返回上一页
+      Navigator.pop(context); // Return to previous page after success
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

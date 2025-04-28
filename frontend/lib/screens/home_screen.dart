@@ -1,4 +1,4 @@
-// 首页，展示 AI 推荐的课程交换帖子列表
+// Home page, displays AI-recommended course swap post list
 
 import 'package:courseswap/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +14,8 @@ class HomeScreen extends StatelessWidget {
     final swapPostProvider = Provider.of<SwapPostProvider>(context, listen: true);
     final authProvider = Provider.of<AuthProvider>(context);
 
-    print('当前帖子数量: ${swapPostProvider.posts.length}');
-    print('当前Token: ${authProvider.token}');
+    print('Current number of posts: ${swapPostProvider.posts.length}');
+    print('Current token: ${authProvider.token}');
 
     return Scaffold(
       appBar: AppBar(
@@ -28,6 +28,24 @@ class HomeScreen extends StatelessWidget {
                 context: context,
                 delegate: PostSearchDelegate(swapPostProvider),
               );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.account_circle),
+            tooltip: 'View My Profile',
+            onPressed: () {
+              final user = authProvider.currentUser;
+              if (user != null) {
+                Navigator.pushNamed(
+                  context,
+                  '/profile',
+                  arguments: user,
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Please log in to view your profile')),
+                );
+              }
             },
           ),
         ],
@@ -57,7 +75,7 @@ class HomeScreen extends StatelessWidget {
     }
 
     if (provider.posts.isEmpty) {
-      return const Center(child: Text('暂无帖子'));
+      return const Center(child: Text('No posts available'));
     }
 
     return ListView.builder(

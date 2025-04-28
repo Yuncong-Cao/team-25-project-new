@@ -1,4 +1,4 @@
-// 用户注册页面，处理新用户注册
+// User registration page, handles new user registration
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

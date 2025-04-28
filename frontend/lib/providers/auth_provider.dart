@@ -1,6 +1,6 @@
-// 管理用户认证状态（如登录、注册、Token 存储等）
-
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../models/user.dart';
 
@@ -22,42 +22,63 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> login(String email, String password) async {
-    try {
-      final response = await ApiService.post('/login', data: {
-        'email': email,
-        'password': password,
-      });
-      _token = response.data['token'];
-      print('Login success, _token value: $_token');
+  Future<void> loadUserFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final userJson = prefs.getString('user');
+    if (token != null && userJson != null) {
+      _token = token;
+      _currentUser = User.fromJson(jsonDecode(userJson));
       _isAuthenticated = true;
-      _currentUser = User.fromJson(response.data['user']);
-      _users.add(_currentUser!);
       notifyListeners();
-    } catch (error) {
-      _isAuthenticated = false;
-      throw Exception('Login failed');
     }
   }
 
-  Future<void> register(String email, String password) async {
+  Future<void> saveUserToPrefs(String token, User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+    await prefs.setString('user', jsonEncode(user.toJson()));
+    _token = token;
+    _currentUser = user;
+    _isAuthenticated = true;
+    notifyListeners();
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('user');
+    _token = null;
+    _currentUser = null;
+    _isAuthenticated = false;
+    notifyListeners();
+  }
+
+  Future<bool> login(String email, String password) async {
     try {
-      print('Sending registration request with email: $email and password: $password');
-      final response = await ApiService.post('/register', data: {
-        'email': email,
-        'password': password,
-      });
-      print('Registration response: ${response.data}');
-      _token = response.data['token'];
-      print('Register success, _token value: $_token');
-      _isAuthenticated = true;
-      _currentUser = User.fromJson(response.data['user']);
-      _users.add(_currentUser!);
-      notifyListeners();
-    } catch (error) {
-      print('Registration error: $error');
-      _isAuthenticated = false;
-      throw Exception('Registration failed');
+      final response = await ApiService.login(email, password);
+      final data = response.data;
+      if (data != null && data['token'] != null) {
+        await saveUserToPrefs(data['token'], User.fromJson(data['user']));
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> register(String email, String password) async {
+    try {
+      final response = await ApiService.register(email, password);
+      final data = response.data;
+      if (data != null && data['token'] != null) {
+        await saveUserToPrefs(data['token'], User.fromJson(data['user']));
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
     }
   }
 }
